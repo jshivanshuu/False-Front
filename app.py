@@ -4,7 +4,7 @@ app = Flask(__name__)
 @app.route("/")
 def hello_world():
     return "<p>Hello, World!</p>"
-@app.route("/login")
+@app.route("/login",methods=["GET","POST"])
 def login():
     return render_template("login.html")
 if __name__ == "__main__":
