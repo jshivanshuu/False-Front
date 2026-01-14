@@ -1,2 +1,4 @@
 .venv/
 logs/
+deception/__pycache__/
+Entry/__pycache__/
