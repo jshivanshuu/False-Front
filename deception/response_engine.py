@@ -1,6 +1,6 @@
-from deception.messages import get_failure_message
-from deception.timing import calculate_delay
-from deception.fakesuccess import fakeadminlogin
+from messages import get_failure_message
+from timing import calculate_delay
+from fakesuccess import fakeadminlogin
 import time
 def decide(session_data):
     now = time.time()
