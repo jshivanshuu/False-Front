@@ -52,9 +52,19 @@ def login():
     )
 
 @app.route("/dashboard")
-def fake_dashboard():
-    # decoy page (very basic for now)
-    return "<h2>Internal Dashboard</h2><p>System status: OK</p>"
+def decoy_dashboard():
+    observe_request(request, session["id"])
+    return render_template("decoy/dashboard.html")
+
+@app.route("/users")
+def decoy_users():
+    observe_request(request, session["id"])
+    return render_template("decoy/users.html")
+
+@app.route("/settings")
+def decoy_settings():
+    observe_request(request, session["id"])
+    return render_template("decoy/settings.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
