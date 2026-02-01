@@ -3,6 +3,9 @@ from Entry.observer import observe_request
 from deception.response_engine import decide
 import time
 from flask import redirect
+from profiling.signals import extract_signals
+from profiling.scorer import score_behavior
+from profiling.classifier import classify
 app = Flask(__name__)
 secret_key = "Falsefront"
 app.secret_key = secret_key
@@ -21,7 +24,8 @@ def login():
 
     # Module 1: observe EVERYTHING
     observe_request(request, session_id)
-
+    session["timestamps"].append(time.time())
+    session["pages_visited"].append(request.path)
     # -------- GET --------
     if request.method == "GET":
         return render_template("login.html")
@@ -42,7 +46,8 @@ def login():
         time.sleep(plan["delay"])
 
     # fake success
-    if plan["fake_success"]:
+    if plan["fake_success"] and not session["fake_used"]:
+        session["fake_used"] = True
         return redirect("/dashboard")
 
     # normal deceptive failure
@@ -54,17 +59,34 @@ def login():
 @app.route("/dashboard")
 def decoy_dashboard():
     observe_request(request, session["id"])
+    session["timestamps"].append(time.time())
+    session["pages_visited"].append(request.path)
     return render_template("decoy/dashboard.html")
 
 @app.route("/users")
 def decoy_users():
     observe_request(request, session["id"])
+    session["timestamps"].append(time.time())
+    session["pages_visited"].append(request.path)
     return render_template("decoy/users.html")
 
 @app.route("/settings")
 def decoy_settings():
     observe_request(request, session["id"])
+    session["timestamps"].append(time.time())
+    session["pages_visited"].append(request.path)
     return render_template("decoy/settings.html")
 
+@app.route("/profile_session")
+def profile_session():
+    signals = extractsignals(session)
+    score = score_behavior(signals)
+    profile = classify(score)
+    return {
+        "profile": profile,
+        "score": score,
+        "signals": signals,
+        "session_id": session.get("id")
+    }
 if __name__ == "__main__":
     app.run(debug=True)
