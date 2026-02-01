@@ -1,4 +1,13 @@
 def extractsignals(session_data):
+     """
+    Extract behavioral signals from session data.
+
+    session_data should include:
+    - attempts
+    - timestamps (list of request times)
+    - pages_visited (list of paths)
+    """
+    
     timestamps = session_data.get("timestamps", [])
     pages = session_data.get("pages_visited", [])
     attempts = session_data.get("attempts",0)
