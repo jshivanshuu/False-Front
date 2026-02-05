@@ -19,6 +19,9 @@ def login():
         session["id"] = str(id(session))
         session["attempts"] = 0
         session["last_attempt_time"] = time.time()
+        session["timestamps"] = []
+        session["pages_visited"] = []
+        session["fake_used"] = False
 
     session_id = session["id"]
 
