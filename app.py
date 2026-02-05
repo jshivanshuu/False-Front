@@ -82,7 +82,7 @@ def decoy_settings():
 
 @app.route("/profile_session")
 def profile_session():
-    signals = extractsignals(session)
+    signals = extract_signals(session)
     score = score_behavior(signals)
     profile = classify(score)
     return {
