@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FalseFront Security Dashboard</title>
+</head>
+<body>
+
+<h1>FalseFront Dashboard</h1>
+
+<h3>System Overview</h3>
+<ul>
+    <li>Total Requests: {{ total_requests }}</li>
+    <li>Total Sessions: {{ total_sessions }}</li>
+</ul>
+
+
+<h3>Route Activity</h3>
+<table border="1">
+<tr>
+    <th>Path</th>
+    <th>Hits</th>
+</tr>
+
+{% for path, count in path_counts.items() %}
+<tr>
+    <td>{{ path }}</td>
+    <td>{{ count }}</td>
+</tr>
+{% endfor %}
+</table>
+
+
+<h3>Session Timelines</h3>
+
+{% for sid, paths in timelines.items() %}
+<div style="margin-bottom:20px;">
+
+    <strong>Session {{ sid }}</strong>
+
+    <p>
+        {% for p in paths %}
+            → {{ p }}
+        {% endfor %}
+    </p>
+
+</div>
+{% endfor %}
+
+</body>
+</html>
