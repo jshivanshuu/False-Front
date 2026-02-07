@@ -94,5 +94,24 @@ def profile_session():
         "signals": signals,
         "session_id": session.get("id")
     }
+@app.route("/admin/dashboard")
+def admin_dashboard():
+
+    logs = load_logs()
+
+    sessions = group_by_session(logs)
+
+    timelines = build_timelines(sessions)
+
+    path_counts = count_paths(logs)
+
+    return render_template(
+        "admin/dashboard.html",
+        total_requests=len(logs),
+        total_sessions=len(sessions),
+        timelines=timelines,
+        path_counts=path_counts
+    )
+
 if __name__ == "__main__":
     app.run(debug=True)
