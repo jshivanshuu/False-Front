@@ -6,6 +6,9 @@ from flask import redirect
 from profiling.signals import extract_signals
 from profiling.scorer import score_behavior
 from profiling.classifier import classify
+from dashboard.parser import load_logs
+from dashboard.analytics import group_by_session, build_timelines, count_paths
+
 app = Flask(__name__)
 secret_key = "Falsefront"
 app.secret_key = secret_key
