@@ -8,9 +8,10 @@ from profiling.scorer import score_behavior
 from profiling.classifier import classify
 from dashboard.parser import load_logs
 from dashboard.analytics import group_by_session, build_timelines, count_paths
-
+from core.config import secret_key
+from core.session import init_session, update_behavior
+from services.deception_service import handle_deception
 app = Flask(__name__)
-secret_key = "Falsefront"
 app.secret_key = secret_key
 @app.route("/")
 def hello_world():
