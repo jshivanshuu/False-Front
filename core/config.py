@@ -1,1 +1,1 @@
-secret_key = "Falsefront"
+SECRET_KEY = "Falsefront"
