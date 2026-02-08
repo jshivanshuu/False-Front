@@ -34,31 +34,6 @@ Security Dashboard
 
 Each layer is independent and modular to ensure maintainability and clarity.
 
-📂 Project Structure
-False-Front/
-│
-├── app.py                 # Main application
-│
-├── core/                  # Core utilities
-│   ├── session.py
-│   └── config.py
-│
-├── entry/                 # Observation module
-│   └── observer.py
-│
-├── deception/             # Deception engine
-│
-├── profiling/             # Attacker profiling
-│
-├── services/              # Service layer
-│
-├── dashboard/             # Log analytics
-│
-├── templates/             # HTML templates
-│
-├── logs/                  # Runtime logs (ignored in git)
-│
-└── requirements.txt
 
 ⚙️ Technologies Used
 
