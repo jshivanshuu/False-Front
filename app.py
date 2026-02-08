@@ -1,109 +1,112 @@
-from flask import Flask, render_template, request, session
-from Entry.observer import observe_request
-from deception.response_engine import decide
+from flask import Flask, render_template, request, session, redirect
 import time
-from flask import redirect
-from profiling.signals import extract_signals
-from profiling.scorer import score_behavior
-from profiling.classifier import classify
+
+# Core
+from core.session import ensure_session, update_behavior
+from core.config import SECRET_KEY
+
+# Logging
+from entry.observer import observe_request
+
+# Services
+from services.deception_service import handle_deception
+from services.profiling_service import profile_session
+
+# Dashboard
 from dashboard.parser import load_logs
 from dashboard.analytics import group_by_session, build_timelines, count_paths
-from core.config import secret_key
-from core.session import init_session, update_behavior
-from services.deception_service import handle_deception
+
+
 app = Flask(__name__)
-app.secret_key = secret_key
-@app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
+app.secret_key = SECRET_KEY
+
+
+# ---------------- Login ----------------
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    # Initialize session state once
-    if "id" not in session:
-        session["id"] = str(id(session))
-        session["attempts"] = 0
-        session["last_attempt_time"] = time.time()
-        session["timestamps"] = []
-        session["pages_visited"] = []
-        session["fake_used"] = False
 
-    session_id = session["id"]
+    ensure_session()
 
-    # Module 1: observe EVERYTHING
-    observe_request(request, session_id)
-    session["timestamps"].append(time.time())
-    session["pages_visited"].append(request.path)
-    # -------- GET --------
+    observe_request(request, session["id"])
+    update_behavior(request.path)
+
     if request.method == "GET":
         return render_template("login.html")
 
-    # -------- POST --------
-    session["attempts"] += 1
+    plan = handle_deception(session)
 
-    plan = decide({
-        "attempts": session["attempts"],
-        "last_attempt_time": session["last_attempt_time"]
-    })
-
-    # update AFTER decision
-    session["last_attempt_time"] = time.time()
-
-    # apply delay
     if plan["delay"] > 0:
         time.sleep(plan["delay"])
 
-    # fake success
     if plan["fake_success"] and not session["fake_used"]:
         session["fake_used"] = True
         return redirect("/dashboard")
 
-    # normal deceptive failure
     return render_template(
         "login.html",
         error_message=plan["message"]
     )
 
+
+# ---------------- Decoy Pages ----------------
+
 @app.route("/dashboard")
 def decoy_dashboard():
+
+    ensure_session()
     observe_request(request, session["id"])
-    session["timestamps"].append(time.time())
-    session["pages_visited"].append(request.path)
+    update_behavior(request.path)
+
     return render_template("decoy/dashboard.html")
+
 
 @app.route("/users")
 def decoy_users():
+
+    ensure_session()
     observe_request(request, session["id"])
-    session["timestamps"].append(time.time())
-    session["pages_visited"].append(request.path)
+    update_behavior(request.path)
+
     return render_template("decoy/users.html")
+
 
 @app.route("/settings")
 def decoy_settings():
+
+    ensure_session()
     observe_request(request, session["id"])
-    session["timestamps"].append(time.time())
-    session["pages_visited"].append(request.path)
+    update_behavior(request.path)
+
     return render_template("decoy/settings.html")
 
+
+# ---------------- Profiling ----------------
+
 @app.route("/profile_session")
-def profile_session():
-    signals = extract_signals(session)
-    score = score_behavior(signals)
-    profile = classify(score)
+def profile_debug():
+
+    ensure_session()
+
+    profile, signals, scores = profile_session(session)
+
     return {
+        "session_id": session.get("id"),
         "profile": profile,
-        "score": score,
         "signals": signals,
-        "session_id": session.get("id")
+        "scores": scores
     }
+
+
+# ---------------- Dashboard ----------------
+
 @app.route("/admin/dashboard")
 def admin_dashboard():
 
     logs = load_logs()
 
     sessions = group_by_session(logs)
-
     timelines = build_timelines(sessions)
-
     path_counts = count_paths(logs)
 
     return render_template(
@@ -113,6 +116,9 @@ def admin_dashboard():
         timelines=timelines,
         path_counts=path_counts
     )
+
+
+# ---------------- Run ----------------
 
 if __name__ == "__main__":
     app.run(debug=True)
