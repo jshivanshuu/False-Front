@@ -21,6 +21,13 @@ app = Flask(__name__)
 app.secret_key = SECRET_KEY
 
 
+# ---------------- Home ----------------
+
+@app.route("/")
+def home():
+    return render_template("generic.html")
+
+
 # ---------------- Login ----------------
 
 @app.route("/login", methods=["GET", "POST"])
