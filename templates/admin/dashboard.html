@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FalseFront — Security Dashboard</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; }
+
+        .topbar {
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 14px 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .topbar .logo { font-size: 1.2rem; font-weight: 700; color: #58a6ff; letter-spacing: 1px; }
+        .topbar .subtitle { font-size: 0.8rem; color: #8b949e; }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 28px 32px; }
+        .full-width { grid-column: 1 / -1; }
+
+        .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .card h3 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #8b949e;
+            margin-bottom: 14px;
+        }
+
+        .stats { display: flex; gap: 16px; flex-wrap: wrap; }
+        .stat-box {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 16px 24px;
+            min-width: 140px;
+        }
+        .stat-box .val { font-size: 2rem; font-weight: 700; color: #58a6ff; }
+        .stat-box .lbl { font-size: 0.75rem; color: #8b949e; margin-top: 4px; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+        th { text-align: left; padding: 8px 12px; color: #8b949e; border-bottom: 1px solid #30363d; font-weight: 500; }
+        td { padding: 8px 12px; border-bottom: 1px solid #21262d; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #1c2128; }
+
+        .session-block { margin-bottom: 16px; padding: 14px; background: #0d1117; border-radius: 6px; border: 1px solid #21262d; }
+        .session-id { font-size: 0.7rem; color: #8b949e; margin-bottom: 8px; font-family: monospace; }
+        .path-chain { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+        .path-pill { background: #1f2937; border: 1px solid #374151; border-radius: 4px; padding: 3px 8px; font-size: 0.75rem; font-family: monospace; color: #93c5fd; }
+        .path-arrow { color: #4b5563; font-size: 0.7rem; }
+
+        #ai-panel { display: none; }
+        #ai-panel.visible { display: block; }
+
+        .btn { background: #238636; color: #fff; border: none; padding: 9px 18px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; font-weight: 500; transition: background 0.2s; }
+        .btn:hover { background: #2ea043; }
+        .btn:disabled { background: #21262d; color: #8b949e; cursor: default; }
+
+        .ai-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+
+        .profile-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; border-radius: 20px; font-weight: 700; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; }
+        .badge-automation  { background: #450a0a; color: #fca5a5; border: 1px solid #7f1d1d; }
+        .badge-high_skill  { background: #431407; color: #fdba74; border: 1px solid #7c2d12; }
+        .badge-low_skill   { background: #1e3a5f; color: #93c5fd; border: 1px solid #1e40af; }
+        .badge-benign      { background: #052e16; color: #86efac; border: 1px solid #166534; }
+        .badge-unknown     { background: #1c2128; color: #8b949e; border: 1px solid #30363d; }
+
+        .risk-pill { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .risk-critical { background: #7f1d1d; color: #fca5a5; }
+        .risk-high     { background: #431407; color: #fdba74; }
+        .risk-medium   { background: #1e3a5f; color: #93c5fd; }
+        .risk-low      { background: #052e16; color: #86efac; }
+
+        .ai-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+        .ai-section { background: #0d1117; border: 1px solid #21262d; border-radius: 6px; padding: 14px; }
+        .ai-section h4 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: #8b949e; margin-bottom: 10px; }
+        .ai-section p  { font-size: 0.875rem; line-height: 1.6; color: #c9d1d9; }
+
+        .indicator-list { list-style: none; }
+        .indicator-list li { font-size: 0.8rem; padding: 4px 0; color: #e2e8f0; display: flex; gap: 8px; align-items: flex-start; }
+        .indicator-list li::before { content: "◆"; color: #f59e0b; font-size: 0.6rem; margin-top: 3px; flex-shrink: 0; }
+
+        .confidence-bar-wrap { margin-top: 8px; }
+        .confidence-label { font-size: 0.75rem; color: #8b949e; margin-bottom: 4px; display: flex; justify-content: space-between; }
+        .confidence-track { background: #21262d; border-radius: 4px; height: 6px; overflow: hidden; }
+        .confidence-fill  { height: 100%; background: linear-gradient(90deg, #2ea043, #58a6ff); border-radius: 4px; transition: width 0.6s ease; }
+
+        .source-tag { font-size: 0.65rem; padding: 2px 7px; border-radius: 4px; background: #1c2128; border: 1px solid #30363d; color: #8b949e; font-family: monospace; }
+        .source-tag.ai { border-color: #2ea043; color: #86efac; }
+
+        .loading { display: flex; align-items: center; gap: 10px; color: #8b949e; font-size: 0.875rem; padding: 20px 0; }
+        .spinner { width: 18px; height: 18px; border: 2px solid #30363d; border-top-color: #58a6ff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .error-msg { color: #fca5a5; font-size: 0.875rem; padding: 12px; background: #450a0a; border-radius: 6px; border: 1px solid #7f1d1d; }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <span class="logo">⬛ FalseFront</span>
+    <span class="subtitle">Deception-Based Security System — Admin Dashboard</span>
+</div>
+
+<div class="grid">
+
+    <div class="card full-width">
+        <h3>System Overview</h3>
+        <div class="stats">
+            <div class="stat-box">
+                <div class="val">{{ total_requests }}</div>
+                <div class="lbl">Total Requests</div>
+            </div>
+            <div class="stat-box">
+                <div class="val">{{ total_sessions }}</div>
+                <div class="lbl">Sessions Tracked</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Route Activity</h3>
+        <table>
+            <tr><th>Path</th><th>Hits</th></tr>
+            {% for path, count in path_counts.items() %}
+            <tr>
+                <td><span style="font-family:monospace;color:#93c5fd;">{{ path }}</span></td>
+                <td>{{ count }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div class="card">
+        <h3>Session Timelines</h3>
+        {% for sid, paths in timelines.items() %}
+        <div class="session-block">
+            <div class="session-id">Session {{ sid }}</div>
+            <div class="path-chain">
+                {% for p in paths %}
+                    <span class="path-pill">{{ p }}</span>
+                    {% if not loop.last %}<span class="path-arrow">→</span>{% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- AI Profiler -->
+    <div class="card full-width">
+        <div class="ai-header">
+            <div>
+                <h3 style="margin-bottom:4px;">✦ AI Attacker Profiler</h3>
+                <p style="font-size:0.8rem;color:#8b949e;">Analyse your current session using Claude AI to see how FalseFront classifies it.</p>
+            </div>
+            <button class="btn" id="analyseBtn" onclick="runAIAnalysis()">Run AI Analysis</button>
+        </div>
+
+        <div id="ai-loading" style="display:none;">
+            <div class="loading"><div class="spinner"></div>Sending session data to AI profiler…</div>
+        </div>
+
+        <div id="ai-error" style="display:none;"></div>
+
+        <div id="ai-panel">
+            <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+                <div id="profile-badge" class="profile-badge badge-unknown">—</div>
+                <div id="risk-pill" class="risk-pill risk-low">—</div>
+                <span id="source-tag" class="source-tag">—</span>
+            </div>
+
+            <div class="confidence-bar-wrap" style="max-width:300px; margin-top:14px;">
+                <div class="confidence-label">
+                    <span>AI Confidence</span>
+                    <span id="confidence-pct">—</span>
+                </div>
+                <div class="confidence-track">
+                    <div class="confidence-fill" id="confidence-fill" style="width:0%"></div>
+                </div>
+            </div>
+
+            <div class="ai-grid">
+                <div class="ai-section" style="grid-column: 1 / -1;">
+                    <h4>Reasoning</h4>
+                    <p id="ai-reasoning">—</p>
+                </div>
+                <div class="ai-section">
+                    <h4>Key Indicators</h4>
+                    <ul class="indicator-list" id="ai-indicators"></ul>
+                </div>
+                <div class="ai-section">
+                    <h4>Behavioral Signals</h4>
+                    <ul class="indicator-list" id="ai-signals"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+async function runAIAnalysis() {
+    const btn = document.getElementById("analyseBtn");
+    btn.disabled = true;
+    btn.textContent = "Analysing…";
+    document.getElementById("ai-loading").style.display = "flex";
+    document.getElementById("ai-panel").classList.remove("visible");
+    document.getElementById("ai-error").style.display = "none";
+
+    try {
+        const res = await fetch("/admin/ai_analyse_session");
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        const data = await res.json();
+        renderResult(data);
+    } catch (err) {
+        document.getElementById("ai-error").style.display = "block";
+        document.getElementById("ai-error").innerHTML =
+            `<div class="error-msg">⚠ Could not complete AI analysis: ${err.message}</div>`;
+    } finally {
+        document.getElementById("ai-loading").style.display = "none";
+        btn.disabled = false;
+        btn.textContent = "Run AI Analysis";
+    }
+}
+
+function renderResult(data) {
+    const ai = data.ai_analysis;
+    const signals = data.signals;
+    const profile = ai.profile || "unknown";
+
+    const badge = document.getElementById("profile-badge");
+    badge.className = `profile-badge badge-${profile}`;
+    const icons = { automation: "🤖", low_skill: "🔍", high_skill: "🎯", benign: "✅", unknown: "?" };
+    badge.textContent = `${icons[profile] || "?"} ${profile.replace("_", " ")}`;
+
+    const riskEl = document.getElementById("risk-pill");
+    const risk = ai.risk_level || "unknown";
+    riskEl.className = `risk-pill risk-${risk}`;
+    riskEl.textContent = risk.toUpperCase();
+
+    const srcEl = document.getElementById("source-tag");
+    const src = ai.source || "unknown";
+    srcEl.className = `source-tag ${src === "ai" ? "ai" : ""}`;
+    srcEl.textContent = src === "ai" ? "⚡ Claude AI" : "⚙ Rule-based fallback";
+
+    const conf = ai.confidence || 0;
+    document.getElementById("confidence-pct").textContent = `${conf}%`;
+    document.getElementById("confidence-fill").style.width = `${conf}%`;
+
+    document.getElementById("ai-reasoning").textContent = ai.reasoning || "No reasoning provided.";
+
+    const indList = document.getElementById("ai-indicators");
+    indList.innerHTML = "";
+    (ai.key_indicators || []).forEach(ind => {
+        const li = document.createElement("li");
+        li.textContent = ind;
+        indList.appendChild(li);
+    });
+
+    const sigList = document.getElementById("ai-signals");
+    sigList.innerHTML = "";
+    [
+        ["attempts", "Login attempts"],
+        ["avg_delay", "Avg delay (s)"],
+        ["unique_pages", "Unique pages visited"],
+    ].forEach(([key, label]) => {
+        if (signals[key] !== undefined) {
+            const li = document.createElement("li");
+            const val = signals[key] !== null ? Number(signals[key]).toFixed(2) : "N/A";
+            li.textContent = `${label}: ${val}`;
+            sigList.appendChild(li);
+        }
+    });
+
+    document.getElementById("ai-panel").classList.add("visible");
+}
+</script>
+
+</body>
+</html>
