@@ -19,7 +19,7 @@ Instead of blocking attackers immediately, FalseFront observes, misleads, and st
 ✅ Modular, Scalable Architecture
 
 🧠 System Architecture
-Request
+Requests
    ↓
 Observation Layer
    ↓
