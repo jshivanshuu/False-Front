@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()  # Load .env file before reading any environment variables
+
 from flask import Flask, render_template, request, session, redirect
 import time
 
