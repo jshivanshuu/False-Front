@@ -49,7 +49,7 @@ Jinja2 Templates
 
 🛠️ Installation
 1. Clone Repository
-git clone https://github.com/your-username/FalseFront.git
+git clone https://github.com/jshivanshuu/FalseFront.git
 cd FalseFront
 
 2. Create Virtual Environment (Recommended)
