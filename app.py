@@ -128,4 +128,6 @@ def admin_dashboard():
 # ---------------- Run ----------------
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    import os
+    debug_mode = os.environ.get("APP_ENV", "production") == "development"
+    app.run(debug=debug_mode)

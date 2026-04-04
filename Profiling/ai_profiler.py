@@ -1,6 +1,7 @@
 import json
 import urllib.request
 import urllib.error
+from core.config import ANTHROPIC_API_KEY
 
 
 ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
@@ -60,6 +61,7 @@ def call_claude(prompt: str) -> dict:
         headers={
             "Content-Type": "application/json",
             "anthropic-version": "2023-06-01",
+            "x-api-key": ANTHROPIC_API_KEY,
         },
         method="POST"
     )
