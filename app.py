@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()  # Load .env file before reading any environment variables
+
 from flask import Flask, render_template, request, session, redirect
 import time
 
@@ -128,4 +131,6 @@ def admin_dashboard():
 # ---------------- Run ----------------
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    import os
+    debug_mode = os.environ.get("APP_ENV", "production") == "development"
+    app.run(debug=debug_mode)

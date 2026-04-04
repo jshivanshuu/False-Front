@@ -1,187 +1,165 @@
-📌 FalseFront — Deception-Based Web Security System
+# FalseFront — Deception-Based Web Security System
 
-FalseFront is a modular, behavior-driven web security system that uses deception, decoy environments, and attacker profiling to analyze malicious activity at the application layer.
+> A modular honeypot that silently **observes**, **misleads**, and **profiles** attackers instead of blocking them — extracting maximum intelligence while staying invisible.
 
-Instead of blocking attackers immediately, FalseFront observes, misleads, and studies them to extract intelligence.
+---
 
-🚀 Features
+## How It Works
 
-✅ Passive Request Logging (Module 1)
+```
+HTTP Request
+    ↓
+Observation Layer    →  Logs IP, path, user-agent, payload size, timestamps
+    ↓
+Deception Engine     →  Artificial delays · Rotating error messages · Fake success redirect
+    ↓
+Decoy Environment    →  Fake internal dashboard, users, settings pages
+    ↓
+Attacker Profiling   →  Rule-based scoring + Claude AI classification
+    ↓
+Admin Dashboard      →  Real-time session timelines, route usage, attack patterns
+```
 
-✅ Behavior-Based Deception (Module 2)
+Each layer is fully independent and modular.
 
-✅ Decoy Internal Environment (Module 3)
+---
 
-✅ Attacker Profiling Engine (Module 4)
+## Features
 
-✅ Security Visualization Dashboard (Module 5)
+Module | Description
+--- | ---
+**Observation** | Logs every request with timestamp, session ID, route, method, IP, user-agent
+**Deception Engine** | Applies delays, rotating error messages, and fake-success redirects based on behavior
+**Decoy Environment** | Serves convincing fake internal pages (`/dashboard`, `/users`, `/settings`)
+**Attacker Profiling** | Classifies sessions as `automation`, `low_skill`, `high_skill`, or `benign`
+**AI Profiling** | Uses Claude API for rich behavioral analysis with rule-based fallback
+**Admin Dashboard** | Visualizes session timelines, route usage, and attack patterns at `/admin/dashboard`
 
-✅ Modular, Scalable Architecture
+---
 
-🧠 System Architecture
-Requests
-   ↓
-Observation Layer
-   ↓
-Deception Engine
-   ↓
-Decoy Environment
-   ↓
-Behavior Profiling
-   ↓
-Security Dashboard
+## Attacker Profiles
 
+Profile | Description
+--- | ---
+`automation` | Bots, scanners, credential stuffing tools — fast, repetitive, uniform timing
+`low_skill` | Human attacker using basic techniques, exploring naively
+`high_skill` | Methodical and patient — mimics normal user behaviour to avoid detection
+`benign` | Likely a legitimate or curious user
 
-Each layer is independent and modular to ensure maintainability and clarity.
+---
 
+## Tech Stack
 
-⚙️ Technologies Used
+- **Python 3** + **Flask**
+- **python-dotenv** for environment variable loading
+- **JSON** log storage
+- **Jinja2** templates
+- **Claude API** (Anthropic) for AI-powered profiling
 
-Python 3
+---
 
-Flask
+## Installation
 
-JSON (log storage)
+### 1. Clone the Repository
+```bash
+git clone https://github.com/jshivanshuu/False-Front.git
+cd False-Front
+```
 
-HTML / CSS
-
-Jinja2 Templates
-
-🛠️ Installation
-1. Clone Repository
-git clone https://github.com/your-username/FalseFront.git
-cd FalseFront
-
-2. Create Virtual Environment (Recommended)
+### 2. Create a Virtual Environment
+```bash
 python -m venv venv
-source venv/bin/activate   # Linux/Mac
-venv\Scripts\activate      # Windows
+source venv/bin/activate      # macOS / Linux
+venv\Scripts\activate         # Windows
+```
 
-3. Install Dependencies
+### 3. Install Dependencies
+```bash
 pip install -r requirements.txt
+```
 
-4. Run Application
+### 4. Configure Environment Variables
+```bash
+cp .env.example .env
+# Edit .env and set your FALSEFRONT_SECRET_KEY and ANTHROPIC_API_KEY
+```
+
+The app uses `python-dotenv` and will automatically load your `.env` file on startup.
+
+### 5. Run the Application
+```bash
+# Development mode (enables debug, allows missing secret key)
+APP_ENV=development python app.py
+
+# Production mode (requires FALSEFRONT_SECRET_KEY to be set)
 python app.py
+```
 
+Access at: `http://127.0.0.1:5000/login`
 
-Access:
+---
 
-http://127.0.0.1:5000/login
+## Key Endpoints
 
-🔍 How It Works
-Module 1 — Observation
+Route | Description
+--- | ---
+`/login` | Entry point — deception triggers on repeated attempts
+`/dashboard` | Decoy internal dashboard (shown to suspected attackers)
+`/users` | Decoy users page
+`/settings` | Decoy settings page
+`/profile_session` | Debug endpoint — returns AI/rule-based behavioral analysis for current session
+`/admin/dashboard` | Real admin panel — session timelines, route usage, attack patterns
 
-Logs every incoming request with metadata such as timestamp, session ID, route, and method.
+---
 
-Module 2 — Deception
+## Security Philosophy
 
-Applies:
+FalseFront follows a **deception-first** model:
 
-Artificial delays
+- ❌ No immediate blocking
+- ❌ No alerting the attacker
+- ❌ No visible defense mechanisms
+- ✅ Maximum intelligence extraction
 
-Rotating error messages
+The attacker believes they are interacting with a real system while every action is logged and analyzed.
 
-Fake authentication success
+---
 
-Based on user behavior.
+## Testing
 
-Module 3 — Decoy Environment
+Simulate different attacker profiles:
 
-Redirects suspicious users to fake internal pages to observe post-compromise behavior.
+- **Automation:** Rapid repeated login attempts with minimal delay
+- **Low-skill:** Manual exploration of decoy pages after a few failed logins
+- **High-skill:** Slow, deliberate navigation that mimics real user behaviour
+- **Benign:** 1–2 requests with natural timing
 
-Module 4 — Profiling
+Verify via `/profile_session` and `/admin/dashboard`.
 
-Classifies attackers as:
+---
 
-Automation
+## Future Enhancements
 
-Low-skill
+- [ ] Authentication on `/admin/dashboard`
+- [ ] ML-based profiling with training data from logs
+- [ ] Log rotation and archival
+- [ ] Automated threat report generation
+- [ ] Threat intelligence feed integration
+- [ ] Blockchain-backed log integrity
 
-High-skill
+---
 
-Benign
+## Author
 
-Using rule-based behavioral analysis.
+**Shivanshu Jha**
+Engineering Student · Cybersecurity Enthusiast
 
-Module 5 — Dashboard
+---
 
-Provides visualization of:
+## Acknowledgements
 
-Session timelines
+Inspired by modern honeypot systems, deception technologies, and behavioural security research.
 
-Route usage
+---
 
-Attack patterns
-
-Available at:
-
-/admin/dashboard
-
-📊 Profiling Debug Endpoint
-
-For development and testing:
-
-/profile_session
-
-
-Returns behavioral analysis for the current session.
-
-🔐 Security Philosophy
-
-FalseFront follows a deception-first security model:
-
-No immediate blocking
-
-No alerting attackers
-
-No visible defense mechanisms
-
-Maximum intelligence extraction
-
-This approach improves attacker understanding and reduces detection risk.
-
-🧪 Testing
-
-Recommended tests:
-
-Rapid login attempts (automation simulation)
-
-Slow manual navigation
-
-Decoy exploration
-
-Dashboard inspection
-
-Verify:
-
-Logs are consistent
-
-Deception triggers correctly
-
-Profiles match behavior
-
-📈 Future Enhancements
-
-Blockchain-backed log integrity
-
-Machine learning profiling
-
-Automated report generation
-
-Advanced visualization
-
-Threat intelligence integration
-
-
-👤 Author
-
-Shivanshu Jha
-Engineering Student | Cybersecurity Enthusiast
-
-⭐ Acknowledgements
-
-Inspired by modern honeypot systems, deception technologies, and behavioral security research.
-
-📝 Disclaimer
-
-This project is intended for educational and research purposes only.
+> **Disclaimer:** This project is intended for educational and research purposes only.

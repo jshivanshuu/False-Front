@@ -1,7 +1,16 @@
+# Virtual environments
 .venv/
+venv/
+
+# Logs (generated at runtime)
 logs/*
-deception/__pycache__/
-Entry/__pycache__/
+
+# Environment / secrets — never commit these
+.env
+
+# Local dev notes — not needed on GitHub
+PROJECT_OVERVIEW.md
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
